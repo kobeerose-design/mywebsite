@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart Transaction System</title>
+
+<link href="bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+
+    <h1 class="text-center text-primary mb-4">
+        Shopping Cart Transaction System
+    </h1>
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white text-center">
+            Product Cart Manager
+        </div>
+
+        <div class="card-body">
+
+            <!-- DISPLAY -->
+            <div class="text-center mb-4">
+
+                <img id="productImage"
+                     src="image/store.png"
+                     alt="Store"
+                     class="img-fluid rounded border border-primary mb-3"
+                     style="height:250px; width:350px; object-fit:cover;">
+
+                <h4 id="productMessage" class="text-primary">
+                    Welcome to our Store
+                </h4>
+
+            </div>
+
+            <!-- PRODUCT LIST -->
+            <h3 class="text-center text-success mb-3">
+                Available Products
+            </h3>
+
+            <div class="row" id="productList"></div>
+
+            <hr>
+
+            <!-- BUTTONS -->
+            <div class="text-center mb-4">
+
+                <button class="btn btn-success"
+                        onclick="showSection('addProductSection')">
+                    Add Product
+                </button>
+
+                <button class="btn btn-warning"
+                        onclick="showSection('updateSection')">
+                    Update Product
+                </button>
+
+                <button class="btn btn-danger"
+                        onclick="showSection('deleteSection')">
+                    Remove Item
+                </button>
+
+                <button class="btn btn-primary"
+                        onclick="showSection('searchSection')">
+                    Search Product
+                </button>
+
+                <button class="btn btn-info text-white"
+                        onclick="showSection('viewSection'); viewCart();">
+                    View Cart
+                </button>
+
+            </div>
+
+            <!-- ADD PRODUCT -->
+            <div id="addProductSection"
+                 class="border rounded p-3 mb-3 d-none">
+
+                <h5 class="text-success">Add New Product</h5>
+
+                <input type="text"
+                       id="productCode"
+                       class="form-control mb-2"
+                       placeholder="Product Code">
+
+                <input type="text"
+                       id="productName"
+                       class="form-control mb-2"
+                       placeholder="Product Name">
+
+                <input type="number"
+                       id="productPrice"
+                       class="form-control mb-2"
+                       placeholder="Product Price">
+
+                <input type="text"
+                       id="productImagePath"
+                       class="form-control mb-2"
+                       placeholder="Image Filename">
+
+                <button class="btn btn-success"
+                        onclick="addNewProduct()">
+                    Save Product
+                </button>
+
+            </div>
+
+            <!-- SEARCH -->
+            <div id="searchSection"
+                 class="border rounded p-3 mb-3 d-none">
+
+                <h5 class="text-primary">Search Product</h5>
+
+                <input type="text"
+                       id="searchCode"
+                       class="form-control mb-2"
+                       placeholder="Enter Product Code">
+
+                <button class="btn btn-primary"
+                        onclick="searchProduct()">
+                    Search
+                </button>
+
+            </div>
+
+            <!-- UPDATE -->
+            <div id="updateSection"
+                 class="border rounded p-3 mb-3 d-none">
+
+                <h5 class="text-warning">Update Product Price</h5>
+
+                <input type="text"
+                       id="updateCode"
+                       class="form-control mb-2"
+                       placeholder="Product Code">
+
+                <input type="number"
+                       id="newPrice"
+                       class="form-control mb-2"
+                       placeholder="New Price">
+
+                <button class="btn btn-warning"
+                        onclick="updateProduct()">
+                    Update
+                </button>
+
+            </div>
+
+            <!-- DELETE -->
+            <div id="deleteSection"
+                 class="border rounded p-3 mb-3 d-none">
+
+                <h5 class="text-danger">
+                    Remove Product From Cart
+                </h5>
+
+                <input type="text"
+                       id="deleteCode"
+                       class="form-control mb-2"
+                       placeholder="Product Code">
+
+                <button class="btn btn-danger"
+                        onclick="removeFromCart()">
+                    Remove
+                </button>
+
+            </div>
+
+            <!-- VIEW -->
+            <div id="viewSection" class="d-none">
+                <div id="output"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+// PRODUCT DATABASE
+let products = [
+{
+    code:"1",
+    name:"Laptop",
+    price:35000,
+    image:"image/laptop.jpg"
+},
+{
+    code:"2",
+    name:"Mouse",
+    price:500,
+    image:"image/mouse.jpg"
+},
+{
+    code:"3",
+    name:"Keyboard",
+    price:1200,
+    image:"image/keyboard.jpg"
+},
+{
+    code:"4",
+    name:"Headset",
+    price:1500,
+    image:"image/headset.jpg"
+},
+
+{
+    code:"5",
+    name:"Printer",
+    price:1500,
+    image:"image/printer.jpg"
+}
+
+
+
+
+];
+
+// CART
+let cart = [];
+
+// DISPLAY PRODUCTS
+function displayProducts(){
+
+    let html = "";
+
+    products.forEach(product => {
+
+        html += `
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+
+                <img src="${product.image}"
+                     class="card-img-top"
+                     style="height:180px; object-fit:cover;">
+
+                <div class="card-body text-center">
+
+                    <h5>${product.name}</h5>
+
+                    <p class="fw-bold text-primary">
+                        ₱${product.price}
+                    </p>
+
+                    <button class="btn btn-success"
+                            onclick="addProductByCode('${product.code}')">
+                        Add To Cart
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+        `;
+    });
+
+    document.getElementById("productList").innerHTML = html;
+}
+
+// ADD PRODUCT
+function addNewProduct(){
+
+    let code = document.getElementById("productCode").value.toUpperCase();
+    let name = document.getElementById("productName").value;
+    let price = Number(document.getElementById("productPrice").value);
+    let image = document.getElementById("productImagePath").value;
+
+    let existing = products.find(item => item.code === code);
+
+    if(existing){
+        alert("Product Code Already Exists!");
+        return;
+    }
+
+    products.push({
+        code,
+        name,
+        price,
+        image
+    });
+
+    displayProducts();
+
+    alert("Product Added Successfully!");
+
+    document.getElementById("productCode").value = "";
+    document.getElementById("productName").value = "";
+    document.getElementById("productPrice").value = "";
+    document.getElementById("productImagePath").value = "";
+}
+
+// HIDE SECTIONS
+function hideAllSections(){
+
+    document.getElementById("searchSection").classList.add("d-none");
+    document.getElementById("updateSection").classList.add("d-none");
+    document.getElementById("deleteSection").classList.add("d-none");
+    document.getElementById("viewSection").classList.add("d-none");
+    document.getElementById("addProductSection").classList.add("d-none");
+
+}
+
+// SHOW SECTION
+function showSection(sectionId){
+
+    hideAllSections();
+
+    document.getElementById(sectionId)
+    .classList.remove("d-none");
+
+}
+
+// SEARCH
+function searchProduct(){
+
+    let code =
+    document.getElementById("searchCode")
+    .value.toUpperCase();
+
+    let product =
+    products.find(item => item.code === code);
+
+    if(product){
+
+        productImage.src = product.image;
+
+        productMessage.innerHTML =
+        `${product.name} - ₱${product.price}`;
+
+    }
+    else{
+
+        productImage.src = "store.png";
+
+        productMessage.innerHTML =
+        "Product Not Found";
+
+    }
+
+}
+
+// ADD TO CART
+function addProductByCode(code){
+
+    let product =
+    products.find(item => item.code === code);
+
+    cart.push(product);
+
+    alert(product.name + " added to cart!");
+
+}
+
+// UPDATE PRODUCT
+function updateProduct(){
+
+    let code =
+    document.getElementById("updateCode")
+    .value.toUpperCase();
+
+    let price =
+    Number(document.getElementById("newPrice").value);
+
+    let index =
+    products.findIndex(item => item.code === code);
+
+    if(index !== -1){
+
+        products[index].price = price;
+
+        displayProducts();
+
+        alert("Price Updated!");
+
+    }
+    else{
+
+        alert("Product Not Found!");
+
+    }
+
+}
+
+// REMOVE ITEM
+function removeFromCart(){
+
+    let code =
+    document.getElementById("deleteCode")
+    .value.toUpperCase();
+
+    let index =
+    cart.findLastIndex(item => item.code === code);
+
+    if(index !== -1){
+
+        cart.splice(index,1);
+
+        alert("Item Removed!");
+
+        viewCart();
+
+    }
+    else{
+
+        alert("Item Not Found!");
+
+    }
+
+}
+
+// VIEW PRODUCTS AND CART
+function viewCart(){
+
+    let total = 0;
+
+    let html = `
+
+    <h4 class="text-success mb-3">
+        Product List
+    </h4>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-success">
+            <tr>
+                <th>Code</th>
+                <th>Product Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    products.forEach(product => {
+
+        html += `
+        <tr>
+            <td>${product.code}</td>
+            <td>${product.name}</td>
+            <td>₱${product.price}</td>
+        </tr>
+        `;
+
+    });
+
+    html += `
+        </tbody>
+    </table>
+
+    <h4 class="text-primary mt-4 mb-3">
+        Shopping Cart
+    </h4>
+
+    <table class="table table-bordered">
+        <thead class="table-primary">
+            <tr>
+                <th>Code</th>
+                <th>Product Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    cart.forEach(item => {
+
+        total += item.price;
+
+        html += `
+        <tr>
+            <td>${item.code}</td>
+            <td>${item.name}</td>
+            <td>₱${item.price}</td>
+        </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+    </table>
+
+    <div class="alert alert-info">
+        <strong>Total Items:</strong> ${cart.length}
+        <br>
+        <strong>Total Amount:</strong> ₱${total}
+    </div>
+    `;
+
+    document.getElementById("output").innerHTML = html;
+}
+
+displayProducts();
+
+</script>
+
+</body>
+</html>
